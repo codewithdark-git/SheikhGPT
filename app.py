@@ -18,8 +18,6 @@ st.title("🕌 SheikhGPT")
     
 # Function to handle speech-to-text input
 
-
-
 # User input via chat or speech
 col1, col2 = st.columns([3, 1])
 with col1:
