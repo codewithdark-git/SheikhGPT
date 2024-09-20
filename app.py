@@ -1,39 +1,51 @@
 import streamlit as st
+import edge_tts  # For text-to-speech
+
 from utility.generate_response import generate_content, create_prompt
-from utility.speech import generate_audio, speech_to_text, play_audio  
-import pyttsx3
+from utility.speak import speech_to_text
+import time
 import asyncio
 
+
 # Streamlit app layout
-st.title("SheikhGPT")
-
-# Initialize pyttsx3 engine for text-to-speech
-engine = pyttsx3.init()
-
-# User input
-if 'response' not in st.session_state:
-    st.session_state['response'] = ''
-
-user_query = st.chat_input("Enter your Islamic query:")
+st.set_page_config(page_title="SheikhGPT", layout="centered")
+st.title("🕌 SheikhGPT")
 
 
+# async def text_to_speech(text, outputFilename):
+#     communicate = edge_tts.Communicate(text, "en-AU-WilliamNeural")
+#     await communicate.save(outputFilename)
+    
+# Function to handle speech-to-text input
+
+
+
+# User input via chat or speech
+col1, col2 = st.columns([3, 1])
+with col1:
+    user_query = st.chat_input(f"Ask any About Islam >...")
+with col2:
+    use_speech = st.button("🎤", help="Click to use speech input")
+
+if use_speech:
+    user_query = speech_to_text()
+
+# Process user query
 if user_query:
-    prompt = create_prompt(user_query)
-    response = generate_content(prompt)  # Generate the response based on the user query
-    st.write("Response:")
-    st.write(response)
-    filepath = asyncio.run(generate_audio(response))
-    if st.button("Speak Response"):
-        # audio_file = generate_audio(response)  # Generate audio
-        play_audio(filepath) 
-            
-            
-else:
-        st.warning("Please enter a query.")
+    # Loading indicator while generating the response
+    with st.spinner('Generating Islamic content >...'):
+        time.sleep(2)  # Simulate the time it takes to generate the response
+        prompt = create_prompt(user_query)
+        response = generate_content(prompt)  # Generate the response in chosen language
+    
+    # Display and speak response
+    st.chat_message("user").write(user_query)
+    st.chat_message("assistant").markdown(response)
+    # asyncio.run(text_to_speech(response, 'response.mp3'))
+    # st.audio('response.mp3')
 
+    # Icon button for text-to-speech
+    if st.button("🔊", help="Click to listen to the response"):
+        pass
 
-# Add button for speech-to-text
-if st.button("Speak Input"):
-    with st.spinner("Listening..."):
-        user_query = speech_to_text()  # Capture speech input
-    st.text_input("Enter your Islamic query:", value=user_query)  # Update input field with recognized text
+   
