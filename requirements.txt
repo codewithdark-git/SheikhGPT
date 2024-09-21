@@ -5,3 +5,4 @@ g4f==0.3.2.7
 curl_cffi
 playsound==1.3.0
 PyAudio
+deep-translator
