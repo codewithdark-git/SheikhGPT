@@ -1,32 +1,22 @@
 import streamlit as st
-import edge_tts
 from utility.generate_response import generate_content, create_prompt
-from utility.speak import speech_to_text
+from utility.speak import speech_to_text, text_to_speech
+from utility.translate import LANGUAGES, translate_text
 import time
-import asyncio
 import json
-from deep_translator import GoogleTranslator
+import asyncio
 
 # Streamlit app layout
 st.set_page_config(page_title="SheikhGPT", layout="centered")
 st.title("🕌 SheikhGPT")
 
-# Language settings
-LANGUAGES = {
-    "English": {"code": "en", "voice": "en-US-GuyNeural"},
-    "Arabic": {"code": "ar", "voice": "ar-SA-HamedNeural"},
-    "Urdu": {"code": "ur", "voice": "ur-PK-AsadNeural"},
-    "Indonesian": {"code": "id", "voice": "id-ID-ArdiNeural"},
-    "French": {"code": "fr", "voice": "fr-FR-HenriNeural"},
-    "Spanish": {"code": "es", "voice": "es-ES-AlvaroNeural"},
-    "Turkish": {"code": "tr", "voice": "tr-TR-AhmetNeural"},
-    "Malay": {"code": "ms", "voice": "ms-MY-OsmanNeural"}
-}
+st.page_link('pages/Quran Recitation.py', icon='📖', label='Quran Recitation', help='Listen Quran recitation') 
+st.page_link('pages/Hadith.py', icon='📖', label='See Your favorite Hadith') 
 
 # Sidebar for settings
 st.sidebar.title("Settings")
-input_language = st.sidebar.selectbox("Select Input Language", list(LANGUAGES.keys()))
-output_language = st.sidebar.selectbox("Select Output Language", list(LANGUAGES.keys()))
+input_language = st.sidebar.selectbox("Select Language", list(LANGUAGES.keys()), help='Select language Input & Output Language')
+output_language = input_language
 
 # Initialize session state
 if 'messages' not in st.session_state:
@@ -35,18 +25,6 @@ if 'favorites' not in st.session_state:
     st.session_state.favorites = []
 if 'show_favorite' not in st.session_state:
     st.session_state.show_favorite = None
-
-# Asynchronous text-to-speech function
-async def text_to_speech(text, output_file, voice):
-    communicate = edge_tts.Communicate(text, voice)
-    await communicate.save(output_file)
-
-# Translate text
-def translate_text(text, src_lang, dest_lang):
-    if src_lang == dest_lang:
-        return text
-    translator = GoogleTranslator(source=LANGUAGES[src_lang]['code'], target=LANGUAGES[dest_lang]['code'])
-    return translator.translate(text)
 
 # User input via chat or speech
 col1, col2 = st.columns([3, 1])
@@ -72,43 +50,56 @@ if user_query:
         with st.spinner('Generating Islamic content...'):
             prompt = create_prompt(english_query, "English")
             english_response = generate_content(prompt)
-        
+            
         # Translate response to output language
         response = translate_text(english_response, "English", output_language)
         
         # Add assistant response to history
         st.session_state.messages.append({"role": "assistant", "content": response, "language": output_language})
         
-        # Generate and play audio response
-        output_file = "response.mp3"
-        asyncio.run(text_to_speech(response, output_file, LANGUAGES[output_language]['voice']))
-        st.audio(output_file)
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
 
-# Display chat history
+# Display chat history (reversed order)
 for idx, message in enumerate(st.session_state.messages):
     with st.chat_message(message["role"]):
-        st.markdown(f"**{message['language']}:** {message['content']}")
-    
-    # Add favorite button for assistant messages
-    if message["role"] == "assistant":
-        if st.button("⭐", key=f"fav_{idx}"):
-            st.session_state.favorites.append(message)
-            st.success("Added to favorites!")
+        st.markdown(f"{message['content']}")
+        
+        # Add favorite button for assistant messages
+        if message["role"] == "assistant":
+            is_favorite = message in st.session_state.favorites
+            if st.button("⭐" if not is_favorite else "★", key=f"fav_{idx}"):
+                if is_favorite:
+                    st.session_state.favorites.remove(message)
+                    st.success("Removed from favorites!")
+                else:
+                    st.session_state.favorites.append(message)
+                    st.success("Added to favorites!")
+                st.rerun()
+
+# Display selected favorite
+if st.session_state.show_favorite is not None:
+    if 0 <= st.session_state.show_favorite < len(st.session_state.favorites):
+        fav = st.session_state.favorites[st.session_state.show_favorite]
+        st.markdown(fav['content'])
+        if st.button("Hide Favorite"):
+            st.session_state.show_favorite = None
+    else:
+        st.session_state.show_favorite = None
+        st.rerun()
 
 # Sidebar for favorites
 st.sidebar.title("Favorites")
 for i, fav in enumerate(st.session_state.favorites):
-    if st.sidebar.button(f"Favorite {i+1} ({fav['language']})", key=f"fav_button_{i}"):
-        st.session_state.show_favorite = i
-
-# Display selected favorite
-if st.session_state.show_favorite is not None:
-    fav = st.session_state.favorites[st.session_state.show_favorite]
-    st.sidebar.text_area("Selected Favorite", fav['content'], height=150)
-    if st.sidebar.button("Hide Favorite"):
-        st.session_state.show_favorite = None
+    with st.sidebar.expander(f"Favorite {i+1} ({fav['language']})"):
+        st.write(fav['content'][:100] + "...")  # Show a preview
+        if st.button("Remove", key=f"remove_fav_{i}"):
+            st.session_state.favorites.pop(i)
+            if st.session_state.show_favorite is not None and st.session_state.show_favorite >= i:
+                st.session_state.show_favorite = max(0, st.session_state.show_favorite - 1)
+            st.rerun()
+        if st.button("View", key=f"view_fav_{i}"):
+            st.session_state.show_favorite = i
 
 # Export chat history
 if st.sidebar.button("Export Chat History"):
