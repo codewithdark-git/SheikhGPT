@@ -12,6 +12,24 @@ def fetch_hadith_llm(query):
 # Streamlit layout for Hadith search
 st.title("Hadith Search")
 
+st.write('Choose Your Choice 🪧:')
+col1, col2, col3 = st.columns(3)
+with col1:
+    if st.button('Back To Home'):
+        st.switch_page("app.py")
+with col2:
+    if st.button('SheikhGPT'):
+        st.switch_page("pages/SheikhGPT.py")
+with col3:
+    if st.button('Recitation Quran'):
+        st.switch_page("pages/Quran Recitation.py")
+
+
+st.markdown("----")
+
+st.chat_message('ai').write("📜 A-Salam ul Kom! Welcome to the Hadith search. Type a topic, and I'll provide you with authentic Hadiths along with translations and references!")
+
+
 user_query = st.text_input("Enter your Hadith query (e.g., prayer, fasting)")
 
 # Fetch and display Hadith
