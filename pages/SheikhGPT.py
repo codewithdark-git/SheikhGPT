@@ -39,6 +39,8 @@ if 'favorites' not in st.session_state:
 if 'show_favorite' not in st.session_state:
     st.session_state.show_favorite = None
 
+st.chat_message('ai').write("🌙 A-Salam ul Kom! How can I assist you today with your questions about Islam? Feel free to ask anything!")
+
 # User input via chat or speech
 col1, col2 = st.columns([3, 1])
 with col1:
@@ -50,7 +52,6 @@ if use_speech:
     with st.spinner(f"Listening in {input_language}..."):
         user_query = speech_to_text(language=LANGUAGES[input_language]['code'])
 
-st.chat_message('ai').write("🌙 A-Salam ul Kom! How can I assist you today with your questions about Islam? Feel free to ask anything!")
 
 # Process user query
 if user_query:
