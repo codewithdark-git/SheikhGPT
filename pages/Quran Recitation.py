@@ -34,6 +34,24 @@ surah_list = [
 # Streamlit interface
 st.subheader("Quran Recitation with Urdu Translation")
 
+st.write('Choose Your Choice 🪧:')
+col1, col2, col3 = st.columns(3)
+with col1:
+    if st.button('Back To Home'):
+        st.switch_page("app.py")
+with col2:
+    if st.button('SheikhGPT'):
+        st.switch_page("pages/SheikhGPT.py")
+with col3:
+    if st.button('See Hadith'):
+        st.switch_page("pages/Hadith.py")
+
+
+st.markdown("----")
+
+st.chat_message('ai').write("📖 A-Salam ul Kom! Welcome to the Quran Recitation page. Select a Surah and Ayah range, and enjoy the beautiful recitation with Urdu translation!")
+
+
 # User input for Surah and Ayat range
 surah = st.sidebar.selectbox("Select Surah", surah_list)
 surah_index = surah.split(".")[0]  # Extract the Surah index
