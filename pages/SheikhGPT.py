@@ -10,8 +10,21 @@ import asyncio
 st.set_page_config(page_title="SheikhGPT", layout="centered")
 st.title("🕌 SheikhGPT")
 
-st.page_link('pages/Quran Recitation.py', icon='📖', label='Quran Recitation', help='Listen Quran recitation') 
-st.page_link('pages/Hadith.py', icon='📖', label='See Your favorite Hadith') 
+st.write('Choose Your Choice 🪧:')
+col1, col2, col3 = st.columns(3)
+with col1:
+    if st.button('Back To Home'):
+        st.switch_page("app.py")
+with col2:
+    if st.button('Recitation Quran'):
+        st.switch_page("pages/Quran Recitation.py")
+with col3:
+    if st.button('See Hadith'):
+        st.switch_page("pages/Hadith.py")
+
+
+st.markdown("----")
+
 
 # Sidebar for settings
 st.sidebar.title("Settings")
@@ -37,7 +50,7 @@ if use_speech:
     with st.spinner(f"Listening in {input_language}..."):
         user_query = speech_to_text(language=LANGUAGES[input_language]['code'])
 
-st.chat_message('ai').write('A-Salam ul Kom')
+st.chat_message('ai').write("🌙 A-Salam ul Kom! How can I assist you today with your questions about Islam? Feel free to ask anything!")
 
 # Process user query
 if user_query:
