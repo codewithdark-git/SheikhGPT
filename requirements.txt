@@ -35,11 +35,11 @@ pydantic_core==2.23.4
 pydeck==0.9.1
 pydub==0.25.1
 Pygments==2.18.0
-pypiwin32==223
+pypiwin32
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 pytz==2024.2
-pywin32==306
+pywin32
 referencing==0.35.1
 requests==2.32.3
 sounddevice==0.5.0
