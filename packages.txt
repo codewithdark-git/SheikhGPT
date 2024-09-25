@@ -1,2 +1,4 @@
 build-essential
+libcurl4-openssl-dev
+portaudio19-dev
 
