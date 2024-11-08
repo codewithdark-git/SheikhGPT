@@ -1,11 +1,11 @@
 from g4f.client import Client
-from g4f.models import gpt_4o
+from g4f.models import gpt_4o_mini
 
 # Define function for generate content
 def generate_content(prompt):
     client = Client()   
     response = client.chat.completions.create(
-        model=gpt_4o,
+        model=gpt_4o_mini,
         messages =[{'role': 'user', 'content': prompt}]
 
     )
